@@ -56,6 +56,23 @@ import sys; sys.path.append("../src")
 from har import data, models, training, metrics, plots, config
 ```
 
+## Exécuter les notebooks
+
+**En local** : après l'installation ci-dessus, `jupyter notebook`, ouvrir le dossier `notebooks/`.
+
+**Sur Google Colab** (GPU inutile, le CPU suffit) :
+
+```python
+!git clone https://github.com/aliounedjamil/M2_DL_HAR.git   # dépôt privé : utiliser un jeton GitHub
+%cd M2_DL_HAR/notebooks
+!pip -q install umap-learn
+# placer train.csv et test.csv dans M2_DL_HAR/data/HAR/ (upload, ou Google Drive + variable HAR_DATA_DIR)
+```
+
+Ordre conseillé (parcours A) : `00_exploration` → `V1_one_hidden_layer` (15–25 min sur CPU) → `06_interpretability`
+(lit la configuration retenue écrite par V1 dans `results/logs/v1_selected.json`).
+Essai rapide de bout en bout : variable d'environnement `HAR_FAST=1` (peu d'époques ; résultats non valables).
+
 ## Répartition (résumé) — deux parcours indépendants
 
 | Parcours A — **Alioune** (commence en premier) | Parcours B — **Madjiguène** |

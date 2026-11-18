@@ -1,11 +1,13 @@
 """Constantes partagées : chemins, graines, colonnes."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = ROOT / "data" / "HAR"
+# HAR_DATA_DIR permet de pointer ailleurs (ex. Google Drive sous Colab)
+DATA_DIR = Path(os.environ.get("HAR_DATA_DIR", ROOT / "data" / "HAR"))
 TRAIN_CSV = DATA_DIR / "train.csv"
 TEST_CSV = DATA_DIR / "test.csv"
-RESULTS_DIR = ROOT / "results"
+RESULTS_DIR = Path(os.environ.get("HAR_RESULTS_DIR", ROOT / "results"))
 FIG_DIR = RESULTS_DIR / "figures"
 LOG_DIR = RESULTS_DIR / "logs"
 
