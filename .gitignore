@@ -1,0 +1,35 @@
+# Données (téléchargées depuis Kaggle, ne pas versionner)
+data/HAR/*.csv
+data/raw/
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/scratch_*.ipynb
+
+# Modèles entraînés (lourds)
+*.pt
+*.pth
+checkpoints/
+
+# LaTeX
+report/*.aux
+report/*.log
+report/*.out
+report/*.synctex.gz
+report/*.toc
+report/*.bbl
+report/*.blg
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

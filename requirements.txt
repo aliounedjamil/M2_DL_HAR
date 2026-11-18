@@ -1,0 +1,12 @@
+numpy>=1.26
+pandas>=2.1
+matplotlib>=3.8
+seaborn>=0.13
+scikit-learn>=1.4
+torch>=2.2
+umap-learn>=0.5
+jupyter>=1.0
+nbconvert>=7.0
+tqdm>=4.66
+# Bonus (recherche d'hyperparamètres)
+optuna>=3.5

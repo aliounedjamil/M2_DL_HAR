@@ -1,0 +1,48 @@
+\documentclass[10pt,a4paper,twocolumn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx,booktabs,amsmath,hyperref,caption}
+\graphicspath{{figures/}{../results/figures/}}
+
+\title{Étude progressive des réseaux de neurones multicouches\\pour la reconnaissance d'activités humaines (HAR)}
+\author{Alioune DIOP \and Madjiguène FALL\\M2 MALIA --- Deep Learning, 2026--2027}
+\date{}
+
+\begin{document}
+\maketitle
+
+% 6 pages maximum. Responsable de chaque section indiqué en commentaire.
+
+\begin{abstract}
+% Ensemble — à écrire en dernier.
+\end{abstract}
+
+\section{Introduction}               % Alioune
+% Motivation, problématique, choix méthodologiques (validation par volontaire, graines, test unique).
+
+\section{Données et prétraitements}  % Madjiguène (EDA) + Alioune (découpage)
+\subsection{Jeu de données HAR}
+\subsection{Découpage apprentissage / validation}
+% Tableau : validation par lignes vs par volontaire vs test.
+\subsection{Référence : régression logistique}
+
+\section{Architectures}              % Madjiguène
+% Tableau : architectures et nombre de paramètres.
+
+\section{Résultats}
+\subsection{MLP à une couche cachée}  % Alioune — activations, optimiseurs, LR, variabilité
+\subsection{Largeur et profondeur}    % Madjiguène
+\subsection{Régularisation}           % Alioune
+\subsection{Évaluation finale sur le test} % Madjiguène — matrices de confusion
+\subsection{Espace latent : t-SNE et UMAP} % Madjiguène
+
+\section{Discussion}                  % Madjiguène
+% Performances, généralisation, limites.
+
+\section{Conclusion}                  % Ensemble
+
+\section*{Usage d'outils d'IA}       % Ensemble — depuis AI_USAGE.md
+
+\end{document}
