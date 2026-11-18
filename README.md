@@ -21,11 +21,13 @@ M2_DL_HAR/
 │   ├── models.py             # MLP configurable (largeur, profondeur, activations, dropout, BN)
 │   ├── training.py           # train_epoch, evaluate, fit (early stopping), multi-graines
 │   ├── metrics.py            # accuracy, F1 macro / par classe, matrice de confusion
-│   └── plots.py              # courbes d'apprentissage, matrices de confusion, projections 2D
+│   ├── plots.py              # courbes d'apprentissage, matrices de confusion, projections 2D
+│   └── interpret.py          # t-SNE / UMAP sur entrées et couche cachée (Partie 6)
 ├── notebooks/
 │   ├── 00_exploration.ipynb  # Partie 1.2 (EDA)
-│   ├── V1_one_hidden_layer.ipynb   # Version 1 du rendu (Parties 1–2)
-│   └── V2_deep_network.ipynb       # Version 2 du rendu (Parties 3–7)
+│   ├── V1_one_hidden_layer.ipynb   # Version 1 du rendu (Parties 1–2) — Alioune
+│   ├── 06_interpretability.ipynb   # Partie 6 (mise au point sur le modèle V1) — Alioune
+│   └── V2_deep_network.ipynb       # Version 2 du rendu (Parties 3–5, 7) — Madjiguène
 ├── results/                  # figures + logs JSON des expériences (résultats val, mean ± std)
 ├── report/                   # rapport (6 pages max) : main.tex + figures
 ├── scripts/
@@ -54,26 +56,18 @@ import sys; sys.path.append("../src")
 from har import data, models, training, metrics, plots, config
 ```
 
-## Répartition (résumé)
+## Répartition (résumé) — deux parcours indépendants
 
-| Partie | Responsable | Relecteur |
-|---|---|---|
-| 0. Socle commun (`src/har`) | les deux (voir TASKS.md) | croisé |
-| 1.2 Exploration des données | Madjiguène | Alioune |
-| 1.3 Découpage par volontaire + comparaison | Alioune | Madjiguène |
-| 1.4 Référence (régression logistique) | Alioune | Madjiguène |
-| 2. MLP 1 couche cachée (activations, optimiseurs, LR, métriques, graines) | Alioune | Madjiguène |
-| 3. Largeur et profondeur | Madjiguène | Alioune |
-| 4. Régularisation | Alioune | Madjiguène |
-| 5. Courbes + évaluation finale test + matrices de confusion | Madjiguène | Alioune |
-| 6. t-SNE / UMAP | Madjiguène | Alioune |
-| 7. Bonus : recherche d'hyperparamètres auto | Alioune | Madjiguène |
-| 7. Bonus : CNN 1D sur signaux bruts | optionnel, à deux | — |
-| Notebook **V1** (assemblage) | Alioune | Madjiguène |
-| Notebook **V2** (assemblage) | Madjiguène | Alioune |
-| Rapport | chacun ses parties, voir TASKS.md | croisé |
+| Parcours A — **Alioune** (commence en premier) | Parcours B — **Madjiguène** |
+|---|---|
+| P1.2 Exploration · P1.3 Découpage · P1.4 Référence | P3 Largeur et profondeur |
+| P2 MLP 1 couche cachée (activations, optimiseurs, LR, graines) | P4 Régularisation |
+| P6 t-SNE / UMAP (`interpret.py`) | P5 Courbes + test unique V2 + matrices de confusion |
+| Notebook **V1** + son test unique | P7 Bonus · Notebook **V2** |
 
-Détails, critères de fin et calendrier : **[TASKS.md](TASKS.md)**.
+Aucune tâche d'un parcours n'attend un résultat de l'autre : le découpage de validation est figé
+dans le code et chacun évalue ses propres modèles sur le test, une seule fois.
+Détails et calendrier : **[TASKS.md](TASKS.md)**.
 
 ## Règles de travail (Git)
 
@@ -83,8 +77,8 @@ Détails, critères de fin et calendrier : **[TASKS.md](TASKS.md)**.
    (cela garantit que chacun comprend tout le projet).
 4. Messages de commit clairs : `P3: ajout des réseaux 2-4 couches`.
 5. Avant d'ouvrir une PR : *Kernel → Restart & Run All* doit passer sans erreur.
-6. **Le jeu de test n'est utilisé qu'une seule fois**, en Partie 5.2, ensemble, à la fin.
-   Aucun autre code ne doit appeler `load_test()`.
+6. **Le jeu de test n'est utilisé qu'une seule fois** : uniquement dans la section 7 de V1 et de V2,
+   une fois les configurations figées. Aucun autre code ne doit appeler `load_test()`.
 7. Toute utilisation d'outils d'IA générative est notée dans `report/AI_USAGE.md`
    (où, et comment le résultat a été vérifié), comme demandé par le sujet.
 

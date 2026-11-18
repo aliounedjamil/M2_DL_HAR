@@ -16,8 +16,7 @@ done
 
 # ---------- jalons (milestones)
 REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-for m in "S1 - Socle + Partie 1" "S2-S3 - Parties 2 et 3" "S4 - Partie 4 + selection" \
-         "S5 - Test final + interpretabilite" "S6 - Rapport + rendu"; do
+for m in S1 S2 S3 S4 S5 S6; do
   gh api "repos/$REPO/milestones" -f title="$m" >/dev/null 2>&1 || true
 done
 
@@ -32,79 +31,35 @@ issue () {  # titre, assigné, labels, jalon, corps
 }
 
 echo "Création des issues…"
-issue "P0 · data.py : chargement + découpage par volontaire + DataLoaders" "$ALIOUNE" partie-0 "S1 - Socle + Partie 1" \
-"- [ ] load_train / load_test / to_xy
-- [ ] split_by_subject (volontaires disjoints) et split_random_rows
-- [ ] StandardScaler ajusté sur train seulement
-- [ ] make_loaders avec graine"
-issue "P0 · training.py : train_epoch, evaluate, fit, run_seeds, LR range test" "$ALIOUNE" partie-0 "S1 - Socle + Partie 1" \
-"- [ ] historique par époque (loss/acc/F1, train/val)
-- [ ] early stopping avec restauration des meilleurs poids
-- [ ] run_seeds -> moyenne ± écart-type"
-issue "P0 · models.py : MLP configurable" "$MADJI" partie-0 "S1 - Socle + Partie 1" \
-"- [ ] largeur / profondeur / activations par couche
-- [ ] dropout, BatchNorm, LayerNorm
-- [ ] embed() = dernière couche cachée ; count_params"
-issue "P0 · metrics.py + plots.py" "$MADJI" partie-0 "S1 - Socle + Partie 1" \
-"- [ ] accuracy, F1 macro, F1 par classe, matrice de confusion
-- [ ] courbes d'apprentissage, heatmap de confusion, nuage 2D"
-
-issue "P1.2 · Exploration des données" "$MADJI" partie-1 "S1 - Socle + Partie 1" \
-"- [ ] nb d'observations / variables / volontaires (train, test)
-- [ ] distribution des classes
-- [ ] stats descriptives ; variables déjà mises à l'échelle ?
-- [ ] histogrammes, boxplots, corrélations
-- [ ] discussion prétraitement ; subject en entrée ?"
-issue "P1.3 · Validation par volontaire vs lignes aléatoires" "$ALIOUNE" partie-1 "S1 - Socle + Partie 1" \
-"- [ ] 5 volontaires entiers en validation
-- [ ] justifier (fenêtres qui se chevauchent)
-- [ ] comparer les deux découpages pour un même modèle"
-issue "P1.4 · Référence : régression logistique" "$ALIOUNE" partie-1 "S1 - Socle + Partie 1" \
-"- [ ] accuracy, F1 macro, F1 par classe en validation"
-
-issue "P2.1 · MLP 1 couche cachée : perte initiale + surapprentissage d'un petit lot" "$ALIOUNE" partie-2 "S2-S3 - Parties 2 et 3" \
-"- [ ] perte initiale ≈ ln(6) ≈ 1,79
-- [ ] perte → 0 sur un petit lot"
-issue "P2.2 · Activations × optimiseurs (LR réglé) + accuracy vs F1" "$ALIOUNE" partie-2 "S2-S3 - Parties 2 et 3" \
-"- [ ] ReLU / Sigmoid / Tanh
-- [ ] SGD / SGD+momentum / Adam, LR réglé chacun
-- [ ] courbes train/val par époque
-- [ ] discussion accuracy vs F1 macro / par classe"
-issue "P2.3 · Variabilité : ≥ 2 configs × ≥ 3 graines" "$ALIOUNE" partie-2 "S2-S3 - Parties 2 et 3" \
-"- [ ] tableau moyenne ± écart-type"
-
-issue "P3.1 · Largeur 64 / 128 / 256 + nb de paramètres" "$MADJI" partie-3 "S2-S3 - Parties 2 et 3" \
-"- [ ] impact sur performance et overfitting, 3 graines"
-issue "P3.2 · Réseaux 2 à 4 couches, combinaisons d'activations" "$MADJI" partie-3 "S2-S3 - Parties 2 et 3" \
-"- [ ] accuracy, F1, nb de paramètres, temps d'entraînement"
-
-issue "P4 · Régularisation (Dropout, weight decay, BatchNorm, early stopping)" "$ALIOUNE" partie-4 "S4 - Partie 4 + selection" \
-"- [ ] chaque variante sur 3 graines
-- [ ] retenir 2–3 configs -> results/selected_configs.json"
-
-issue "P5.1 · Courbes d'apprentissage des configs retenues" "$MADJI" partie-5 "S5 - Test final + interpretabilite" \
-"- [ ] loss + accuracy/F1, train/val"
-issue "P5.2 · ÉVALUATION UNIQUE SUR LE TEST + matrices de confusion (ensemble)" "$MADJI" partie-5 "S5 - Test final + interpretabilite" \
-"⚠️ À faire une seule fois, à deux.
-- [ ] 2–3 configs + référence ; val vs test
-- [ ] matrices de confusion ; classes difficiles et explication capteurs
-- [ ] conclure sur 1.3 : quel découpage de validation prédit le mieux le test ?"
-issue "P6 · t-SNE / UMAP : couche cachée vs entrées brutes" "$MADJI" partie-6 "S5 - Test final + interpretabilite" \
-"- [ ] synthèse de lecture
-- [ ] projections + lien avec la matrice de confusion
-- [ ] perplexité, distances entre groupes, variabilité"
-
-issue "P7 · Bonus : recherche automatique d'hyperparamètres" "$ALIOUNE" bonus "S5 - Test final + interpretabilite" \
-"- [ ] random search / Optuna, en validation uniquement"
-
-issue "Notebook V1 (1 couche cachée) — assemblage" "$ALIOUNE" notebook-rendu "S6 - Rapport + rendu" \
-"- [ ] 7 sections imposées ; Restart & Run All OK"
-issue "Notebook V2 (réseau profond) — assemblage" "$MADJI" notebook-rendu "S6 - Rapport + rendu" \
-"- [ ] 7 sections imposées ; Restart & Run All OK"
-
-issue "Rapport · intro, données/découpage, résultats P1.4-P2-P4" "$ALIOUNE" rapport "S6 - Rapport + rendu" ""
-issue "Rapport · architectures, résultats P3-P5-P6, discussion, mise en page" "$MADJI" rapport "S6 - Rapport + rendu" ""
-issue "Rapport · conclusion + relecture croisée + usage IA + ZIP Moodle" "$ALIOUNE" rapport "S6 - Rapport + rendu" \
-"À faire ensemble. Assigner aussi $MADJI."
+# ---------------- Parcours A — Alioune
+issue "A · P0 · data.py + training.py sur les vraies données" "$ALIOUNE" partie-0 "S1" \
+"- [ ] chargement, découpage par volontaire (SPLIT_SEED figé), DataLoaders
+- [ ] train_epoch / evaluate / fit / run_seeds / lr_range_test"
+issue "A · P1.2 · Exploration des données" "$ALIOUNE" partie-1 "S1" \
+"- [ ] tailles, volontaires, distribution des classes, stats descriptives
+- [ ] histogrammes, boxplots, corrélations ; discussion prétraitement ; subject en entrée ?"
+issue "A · P1.3 · Validation par volontaire vs lignes aléatoires" "$ALIOUNE" partie-1 "S1" \
+"- [ ] justification (fenêtres qui se chevauchent) ; comparaison des deux découpages"
+issue "A · P1.4 · Référence : régression logistique" "$ALIOUNE" partie-1 "S1" ""
+issue "A · P2.1 · MLP [64] : perte initiale + surapprentissage d'un petit lot" "$ALIOUNE" partie-2 "S2" ""
+issue "A · P2.2 · Activations × optimiseurs (LR réglé) + accuracy vs F1" "$ALIOUNE" partie-2 "S2" ""
+issue "A · P2.3 · Variabilité : ≥ 2 configs × 3 graines" "$ALIOUNE" partie-2 "S3" ""
+issue "A · P6 · interpret.py + t-SNE / UMAP (modèle V1, validation)" "$ALIOUNE" partie-6 "S4" \
+"- [ ] entrées brutes vs dernière couche cachée ; lien avec la matrice de confusion de validation
+- [ ] perplexité, variabilité entre graines, limites"
+issue "A · Notebook V1 + test unique (référence + MLP V1)" "$ALIOUNE" notebook-rendu "S5" ""
+issue "A · Rapport : intro, données, référence, P2, interprétabilité" "$ALIOUNE" rapport "S5" ""
+# ---------------- Parcours B — Madjiguène
+issue "B · P0 · models.py + metrics.py + plots.py" "$MADJI" partie-0 "S1" ""
+issue "B · P3.1 · Largeur 64 / 128 / 256 + nb de paramètres" "$MADJI" partie-3 "S1" ""
+issue "B · P3.2 · Réseaux 2 à 4 couches, combinaisons d'activations" "$MADJI" partie-3 "S2" ""
+issue "B · P4 · Régularisation + sélection de 2–3 configs" "$MADJI" partie-4 "S3" ""
+issue "B · P5.1 · Courbes d'apprentissage des configs retenues" "$MADJI" partie-5 "S4" ""
+issue "B · P7 · Bonus : recherche automatique d'hyperparamètres" "$MADJI" bonus "S4" ""
+issue "B · P5.2 · Test unique V2 + matrices de confusion" "$MADJI" partie-5 "S5" ""
+issue "B · Notebook V2 (+ appel à interpret.py)" "$MADJI" notebook-rendu "S5" ""
+issue "B · Rapport : architectures, P3, P4, évaluation finale, discussion, mise en page" "$MADJI" rapport "S5" ""
+# ---------------- Ensemble
+issue "Ensemble · Rapport final, relecture croisée, usage IA, ZIP Moodle" "$ALIOUNE" rapport "S6" ""
 
 echo "Terminé."

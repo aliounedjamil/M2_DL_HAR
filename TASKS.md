@@ -1,125 +1,72 @@
-# Répartition des tâches
+# Répartition des tâches — deux parcours indépendants
 
-Principe : chacun **porte** des parties de bout en bout (code, expériences, figures, section du rapport)
-et **relit** les parties de l'autre via les Pull Requests. La charge est équilibrée : Alioune a plus
-d'expériences de réglage (Parties 2, 4), Madjiguène plus d'analyse et de visualisation (Parties 3, 5, 6) ;
-chacun assemble un des deux notebooks de rendu.
+Principe : le projet est coupé en **deux parcours qui ne dépendent pas l'un de l'autre**.
+Chacun peut avancer à son rythme sans attendre l'autre ; Alioune démarre en premier.
 
-Estimation de charge (jours-personne indicatifs) : **Alioune ≈ 9,5 j · Madjiguène ≈ 9,5 j**.
+- **Parcours A — DIOP Alioune** : données, référence, réseau à 1 couche cachée (**Version 1**), interprétabilité.
+- **Parcours B — FALL Madjiguène** : réseaux larges et profonds, régularisation, bonus (**Version 2**).
 
----
+Charge estimée : **A ≈ 10,5 j · B ≈ 10,5 j**.
 
-## Étape 0 — Socle commun (semaine 1) · à faire en premier, ensemble
+## Ce qui rend les parcours indépendants
 
-| Tâche | Qui | Fichier | Fini quand… |
-|---|---|---|---|
-| Créer le dépôt, protéger `main`, inviter le binôme | Alioune | GitHub | Madjiguène peut pousser une branche |
-| Chargement des CSV, découpage par volontaire, DataLoaders | Alioune | `src/har/data.py` | `split_by_subject` renvoie des volontaires disjoints |
-| MLP configurable | Madjiguène | `src/har/models.py` | `MLP(561, [64], 6)` et `MLP(561, [256,128,64], 6, dropout=0.3, batch_norm=True)` fonctionnent |
-| `train_epoch`, `evaluate`, `fit`, `run_seeds` | Alioune | `src/har/training.py` | un historique par époque est renvoyé (loss/acc/F1, train/val) |
-| Métriques + figures | Madjiguène | `src/har/metrics.py`, `plots.py` | courbes et matrice de confusion s'affichent |
+| Risque de dépendance | Règle qui le supprime |
+|---|---|
+| Le découpage train/val | Figé dans le code : `data.split_by_subject(df)` avec `config.SPLIT_SEED = 42` → les **mêmes 5 volontaires** pour tout le monde, sans attendre la P1.3. |
+| Le code commun (`src/har/`) | Déjà écrit. On ne fait que des **ajouts** (nouvelles fonctions / nouveaux arguments optionnels), jamais de changement de signature. Tout changement passe par une PR. |
+| Le pas d'apprentissage | B ne réutilise pas les résultats de la P2 : elle règle son propre LR (petite grille) sur ses réseaux profonds. |
+| L'évaluation finale sur le test | Chacun évalue **ses** modèles **une seule fois** dans la section 7 de **son** notebook : A → référence + MLP 1 couche (V1) ; B → 2–3 configs profondes (V2). |
+| t-SNE / UMAP sur le réseau final | A écrit `src/har/interpret.py` et le met au point sur son modèle V1. B n'a qu'**un appel de fonction** à ajouter dans la V2, en toute fin de projet. |
 
-Charge : 1 j chacun.
-
----
-
-## DIOP Alioune
-
-### P1.3 — Découpage apprentissage / validation (1 j)
-- [ ] Réserver 5 volontaires entiers de `train.csv` pour la validation (`config.VAL_SUBJECTS`).
-- [ ] Expliquer pourquoi (fenêtres consécutives qui se chevauchent → fuite d'information).
-- [ ] Pour un même modèle (régression logistique **et** MLP 64), comparer validation par lignes
-      aléatoires vs par volontaire. Lequel est le plus proche du test ? *(à vérifier en P5.2)*
-
-### P1.4 — Référence (0,5 j)
-- [ ] Régression logistique multiclasse (scikit-learn) : accuracy, F1 macro, F1 par classe en validation.
-
-### P2 — MLP à une couche cachée (3 j)
-- [ ] 2.1 : MLP 64 neurones, CrossEntropyLoss ; vérifier la perte initiale ≈ ln(6) ≈ 1,79 ;
-      surapprentissage d'un petit lot (perte → 0).
-- [ ] 2.2 : activations ReLU / Sigmoid / Tanh.
-- [ ] 2.2 : optimiseurs SGD / SGD+momentum / Adam, **LR réglé pour chacun** (LR range test ou grille log).
-- [ ] 2.2 : suivi accuracy + loss train/val à chaque époque ; discussion accuracy vs F1 (macro, par classe)
-      en lien avec la distribution des classes (P1.2).
-- [ ] 2.3 : ≥ 2 configurations × ≥ 3 graines → moyenne ± écart-type.
-
-### P4 — Régularisation (2 j)
-- [ ] Sur le meilleur réseau profond de P3 : Dropout (0,1 / 0,3 / 0,5), weight decay, BatchNorm, early stopping.
-- [ ] Chaque variante sur 3 graines ; tableau mean ± std.
-- [ ] Retenir les **2–3 meilleures configurations** (val) → les noter dans `results/selected_configs.json`.
-
-### P7 — Bonus : recherche automatique d'hyperparamètres (1 j)
-- [ ] Random search (ou Optuna) sur largeur, profondeur, LR, dropout, weight decay — en validation uniquement.
-
-### Assemblage notebook V1 (0,5 j)
-- [ ] `notebooks/V1_one_hidden_layer.ipynb` : structure imposée en 7 sections, Restart & Run All OK.
-
-### Rapport (1,5 j)
-- [ ] Introduction (motivation, choix méthodologiques).
-- [ ] Données, découpage, prétraitements (avec Madjiguène pour l'EDA).
-- [ ] Résultats P1.4, P2, P4 (tableaux mean ± std, figures).
-
-**Total ≈ 9,5 j**
+Seuls points de rencontre : la relecture des PR (facultative pour avancer) et le rapport final (semaine 6).
 
 ---
 
-## FALL Madjiguène
+## Parcours A — DIOP Alioune (commence en premier)
 
-### P1.2 — Exploration des données (1 j)
-- [ ] Nombre d'observations, de variables, de volontaires (train et test).
-- [ ] Distribution des classes (train, test, par volontaire).
-- [ ] Statistiques descriptives (moyenne, écart-type, min, max) ; les variables sont-elles déjà dans [-1, 1] ?
-- [ ] Histogrammes, boxplots, carte de corrélations.
-- [ ] Discussion prétraitement : normalisation, encodage de `Activity`, retrait de `subject` des entrées (pourquoi).
-
-### P3 — Extension de l'architecture (2,5 j)
-- [ ] 3.1 : largeur 64 → 128 → 256 ; nombre de paramètres ; impact sur l'overfitting.
-- [ ] 3.2 : 2 à 4 couches cachées ; combinaisons d'activations ; accuracy, F1, nb de paramètres, temps d'entraînement.
-- [ ] 3 graines pour les comparaisons importantes.
-
-### P5 — Visualisation et évaluation finale (1,5 j)
-- [ ] 5.1 : courbes loss + accuracy/F1 train/val pour les configurations retenues.
-- [ ] 5.2 : **évaluation unique sur le test** (à faire ensemble) des 2–3 configs + la référence ; comparaison val vs test.
-- [ ] Matrices de confusion test ; discussion des classes difficiles (SITTING/STANDING…) du point de vue capteurs.
-
-### P6 — t-SNE / UMAP (2 j)
-- [ ] 6.1 : courte synthèse de lecture (principe, limites).
-- [ ] 6.2 : projections des activations de la dernière couche cachée vs des entrées brutes.
-- [ ] 6.3 : lien avec la matrice de confusion ; effet de la perplexité ; variabilité entre exécutions.
-
-### Assemblage notebook V2 (0,5 j)
-- [ ] `notebooks/V2_deep_network.ipynb` : réseau profond + régularisations + visualisations + bonus, Restart & Run All OK.
-
-### Rapport (2 j)
-- [ ] Description des architectures (+ nb de paramètres).
-- [ ] Résultats P3, P5, P6 (figures).
-- [ ] Discussion critique (performances, généralisation, limites).
-- [ ] Mise en page finale (6 pages max).
-
-**Total ≈ 9,5 j**
-
----
-
-## Ensemble
-
-- [ ] Conclusion du rapport.
-- [ ] Relecture croisée complète du rapport.
-- [ ] `report/AI_USAGE.md` → section dans le rapport sur l'usage d'outils d'IA.
-- [ ] Bonus optionnel : CNN 1D / RNN sur signaux bruts UCI.
-- [ ] `scripts/make_submission.sh` → `M2_DL_2026_DIOP_FALL.zip` déposé sur Moodle.
-
----
-
-## Calendrier indicatif (à ajuster à la date de rendu)
-
-| Semaine | Alioune | Madjiguène |
+| # | Tâche | Charge |
 |---|---|---|
-| S1 | Socle `data.py`, `training.py` · P1.3 · P1.4 | Socle `models.py`, `metrics.py`, `plots.py` · P1.2 |
-| S2 | P2 (activations, optimiseurs, LR) | P3.1 (largeur) |
-| S3 | P2.3 (graines) · assemblage V1 | P3.2 (profondeur) |
-| S4 | P4 (régularisation) · sélection des configs | P5.1 courbes · P6 t-SNE/UMAP |
-| S5 | P7 bonus · rapport | **P5.2 test (ensemble)** · P6.3 · assemblage V2 · rapport |
-| S6 | Relecture croisée, conclusion, ZIP | Relecture croisée, mise en page, ZIP |
+| P0 | Vérifier / compléter `data.py` et `training.py` sur les vraies données | 1 j |
+| P1.2 | Exploration des données (`00_exploration.ipynb`) : tailles, volontaires, classes, stats, histogrammes, boxplots, corrélations, discussion prétraitement, `subject` en entrée ? | 1 j |
+| P1.3 | Validation par volontaires entiers vs lignes aléatoires (justification + comparaison) | 1 j |
+| P1.4 | Référence : régression logistique (accuracy, F1 macro, F1 par classe) | 0,5 j |
+| P2.1 | MLP [64] : perte initiale ≈ ln 6, surapprentissage d'un petit lot | 0,5 j |
+| P2.2 | Activations (ReLU / Sigmoid / Tanh) × optimiseurs (SGD / momentum / Adam), LR réglé ; accuracy vs F1 | 2 j |
+| P2.3 | ≥ 2 configs × 3 graines, moyenne ± écart-type | 0,5 j |
+| P6 | `src/har/interpret.py` + `06_interpretability.ipynb` : t-SNE / UMAP sur entrées brutes vs dernière couche cachée (modèle V1), lien avec la matrice de confusion **de validation**, perplexité, variabilité | 2 j |
+| V1 | Assemblage `V1_one_hidden_layer.ipynb` + **section 7 : test une seule fois** (référence + MLP V1, matrice de confusion, réponse finale à la P1.3) | 0,5 j |
+| Rapport | Introduction · Données et découpage · Référence · Résultats P2 · Interprétabilité | 1,5 j |
 
-Dépendances clés : P3 attend le socle ; P4 attend la meilleure architecture de P3 ; P5.2 et P6 attendent
-`results/selected_configs.json` (fin P4).
+## Parcours B — FALL Madjiguène
+
+| # | Tâche | Charge |
+|---|---|---|
+| P0 | Vérifier / compléter `models.py`, `metrics.py`, `plots.py` | 1 j |
+| P3.1 | Largeur 64 / 128 / 256 : nb de paramètres, performance, overfitting (3 graines) | 1 j |
+| P3.2 | 2 à 4 couches cachées, combinaisons d'activations : acc, F1, paramètres, temps | 1,5 j |
+| P4 | Régularisation sur son meilleur réseau : Dropout 0,1/0,3/0,5, weight decay, BatchNorm, early stopping ; retenir 2–3 configs → `results/selected_configs.json` | 2 j |
+| P5.1 | Courbes d'apprentissage des configs retenues | 0,5 j |
+| P7 | Bonus : recherche automatique d'hyperparamètres (random search / Optuna, validation seulement) | 1 j |
+| P5.2 | **Section 7 de la V2 : test une seule fois** sur les 2–3 configs, matrices de confusion, classes difficiles (point de vue capteurs) | 1 j |
+| V2 | Assemblage `V2_deep_network.ipynb` (+ un appel à `interpret.py` pour la t-SNE/UMAP du modèle final) | 0,5 j |
+| Rapport | Architectures (+ paramètres) · Résultats P3, P4 · Évaluation finale · Discussion · Mise en page | 2 j |
+
+## Ensemble (semaine 6)
+
+- [ ] Tableau final comparant référence, V1 et V2 (validation vs test) dans le rapport.
+- [ ] Conclusion, relecture croisée, section « usage d'outils d'IA » (`report/AI_USAGE.md`).
+- [ ] `scripts/make_submission.sh` → `M2_DL_2026_DIOP_FALL.zip` sur Moodle.
+- [ ] Bonus optionnel : CNN 1D / RNN sur signaux bruts.
+
+---
+
+## Calendrier indicatif
+
+| Semaine | Alioune (A) | Madjiguène (B) |
+|---|---|---|
+| S1 | P0 · P1.2 · P1.3 · P1.4 | P0 · P3.1 |
+| S2 | P2.1 · P2.2 | P3.2 |
+| S3 | P2.3 · rédaction P1–P2 | P4 |
+| S4 | P6 (t-SNE / UMAP) | P5.1 · P7 bonus |
+| S5 | V1 + test unique · rédaction | P5.2 test unique · V2 · rédaction |
+| S6 | **Ensemble** : rapport final, relecture, ZIP | **Ensemble** |
