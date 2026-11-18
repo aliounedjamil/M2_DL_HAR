@@ -118,7 +118,8 @@ def fit(
     return hist
 
 
-def run_seeds(build_fn: Callable[[int], tuple], seeds=(0, 1, 2), **fit_kwargs) -> dict:
+def run_seeds(build_fn: Callable[[int], tuple], seeds=(0, 1, 2), keep_models: bool = False,
+              **fit_kwargs) -> dict:
     """Répète l'entraînement sur plusieurs graines (Partie 2.3).
 
     build_fn(seed) doit renvoyer (model, train_loader, val_loader, optimizer).
@@ -130,8 +131,10 @@ def run_seeds(build_fn: Callable[[int], tuple], seeds=(0, 1, 2), **fit_kwargs) -
         model, tl, vl, opt = build_fn(s)
         h = fit(model, tl, vl, opt, **fit_kwargs)
         i = h["best_epoch"] - 1 if fit_kwargs.get("patience") else -1
-        runs.append({"seed": s, "history": h,
-                     "val_acc": h["val_acc"][i], "val_f1": h["val_f1"][i]})
+        run = {"seed": s, "history": h, "val_acc": h["val_acc"][i], "val_f1": h["val_f1"][i]}
+        if keep_models:
+            run["model"] = model
+        runs.append(run)
     summary = {}
     for k in ("val_acc", "val_f1"):
         v = np.array([r[k] for r in runs])
