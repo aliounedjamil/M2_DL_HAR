@@ -10,8 +10,8 @@ MADJI="${2:?login GitHub de Madjiguène}"
 # ---------- labels
 for l in "partie-0:ededed" "partie-1:0e8a16" "partie-2:1d76db" "partie-3:5319e7" \
          "partie-4:fbca04" "partie-5:d93f0b" "partie-6:b60205" "bonus:c5def5" \
-         "rapport:006b75" "notebook-rendu:000000"; do
-  gh label create "${l%%:*}" --color "${l##*:}" --force >/dev/null
+         "rapport:006b75" "notebook-rendu:000000" "resp:alioune:0052cc" "resp:madjiguene:e99695"; do
+  gh label create "${l%:*}" --color "${l##*:}" --force >/dev/null
 done
 
 # ---------- jalons (milestones)
@@ -22,8 +22,13 @@ for m in "S1 - Socle + Partie 1" "S2-S3 - Parties 2 et 3" "S4 - Partie 4 + selec
 done
 
 issue () {  # titre, assigné, labels, jalon, corps
-  gh issue create --title "$1" --assignee "$2" --label "$3" --milestone "$4" --body "$5" >/dev/null
-  echo "  ✓ $1"
+  local who; [ "$2" = "$ALIOUNE" ] && who="resp:alioune" || who="resp:madjiguene"
+  if gh issue create --title "$1" --assignee "$2" --label "$3,$who" --milestone "$4" --body "$5" >/dev/null 2>&1; then
+    echo "  ✓ $1  ($2)"
+  else  # assigné pas encore collaborateur : on crée sans assignation, l'étiquette resp:* indique le responsable
+    gh issue create --title "$1" --label "$3,$who" --milestone "$4" --body "$5" >/dev/null
+    echo "  ✓ $1  (non assignée — étiquette $who)"
+  fi
 }
 
 echo "Création des issues…"
