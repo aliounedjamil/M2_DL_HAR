@@ -338,15 +338,15 @@ deux postures que les capteurs distinguent mal, et la couche cachée reproduit c
 par volontaires permettrait de mesurer la variabilité due au choix des personnes, que nos écarts-types ne couvrent pas.
 
 \section*{Usage d'outils d'IA}       % Ensemble — depuis AI_USAGE.md
-Nous avons utilisé l'assistant Claude (Anthropic). Pour la partie de Madjiguène Fall : guidage de la mise en place,
-écriture des scripts d'expériences et des cellules du notebook de la version~2, aide à la lecture des tableaux
-et à la rédaction des interprétations et de ce rapport. Chaque script a été exécuté, les nombres de paramètres
-recalculés, une cellule de contrôle a vérifié que les modèles évalués au test reproduisent les résultats de
-validation, et les formulations ont été relues face aux tableaux et figures ; les explications non vérifiées
-sont signalées comme hypothèses. Pour la partie d'Alioune Diop : génération de l'organisation du dépôt, du code
-commun et des notebooks d'exploration, de version~1 et d'interprétabilité, et aide à la rédaction de ses sections. Les
-notebooks ont été exécutés sur les vraies données, les contrôles (perte initiale, mini-lot, absence de volontaire
-commun entre apprentissage et validation, test utilisé une seule fois) vérifiés, et les chiffres du rapport relus
-face aux sorties. Le détail figure dans \texttt{report/AI\_USAGE.md}.
+Comme le sujet l'autorise, nous avons tous les deux utilisé l'assistant Claude (Anthropic) comme aide à la
+programmation et à la rédaction : écriture de code à partir de nos consignes (code commun, scripts d'expériences,
+cellules des notebooks), dépannage de l'environnement et aide à la formulation des interprétations. Nous avons
+conduit et contrôlé ce travail : cadrage dans le style des TP du cours, exécution de toutes les expériences sur
+les vraies données, vérification des contrôles (perte initiale $\approx \ln 6$, mini-lot appris, aucun volontaire
+commun entre apprentissage et validation, test utilisé une seule fois), recalcul des nombres de paramètres,
+cellule de cohérence entre validation et test, et relecture de chaque chiffre face aux sorties ; les explications
+non vérifiées sont signalées comme hypothèses. Alioune Diop a en outre mené une seconde implémentation
+indépendante (avec l'outil Antigravity), confrontée à celle-ci pour contrôler les choix et les résultats.
+Le détail, fichier par fichier, figure dans \texttt{report/AI\_USAGE.md}.
 
 \end{document}
