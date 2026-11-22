@@ -1,4 +1,4 @@
-\documentclass[10pt,a4paper,twocolumn]{article}
+\documentclass[10pt,a4paper]{article}
 \usepackage{iftex}
 \ifPDFTeX                       % pdfLaTeX (Overleaf, MiKTeX) : babel
   \usepackage[utf8]{inputenc}
@@ -13,6 +13,7 @@
 \usepackage[margin=2cm]{geometry}
 \usepackage{graphicx,booktabs,amsmath,hyperref,caption}
 \hypersetup{hidelinks}
+\setlength{\textfloatsep}{8pt plus 2pt}\setlength{\intextsep}{8pt plus 2pt}
 \graphicspath{{figures/}{../results/figures/}}
 
 \title{Étude progressive des réseaux de neurones multicouches\\pour la reconnaissance d'activités humaines (HAR)}
@@ -64,7 +65,7 @@ tableau~\ref{tab:split}, complété après l'évaluation finale, compare les deu
 découpage aléatoire surestime l'accuracy de test de 3,3 à 4,4 points, le découpage par volontaire de 0,8 à 1,6 point
 seulement. C'est donc lui qui estime le mieux la performance sur des personnes nouvelles.
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering\footnotesize
 \setlength{\tabcolsep}{3pt}
 \caption{Accuracy de validation et de test selon le découpage (MLP : moyenne sur 3 graines).}
@@ -97,7 +98,7 @@ résume les architectures étudiées avec leur nombre de paramètres (la régres
 en compte 3\,372). La version~1 correspond à la ligne $[64]$. Pour la version~2, nous retenons
 $[256,128,64]$ avec les activations ReLU, ReLU, tanh : 185\,414 paramètres (186\,310 avec BatchNorm).
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering\footnotesize
 \setlength{\tabcolsep}{2pt}
 \caption{Architectures et validation (Adam, 30 époques, 3 graines ; pour chaque architecture, meilleur
@@ -181,7 +182,7 @@ différente). Enfin, une recherche aléatoire de 30 configurations (bonus) ne tr
 meilleur : les trois meilleures, ré-évaluées sur 3 graines, atteignent 0,950 à 0,954, et le meilleur score à une
 graine (0,957) retombe à 0,954, effet attendu de la sélection sur 30 essais.
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering\footnotesize
 \setlength{\tabcolsep}{2pt}
 \caption{Régularisation de $[256,128,64]$ (validation, 3 graines). Dropout 0,1 et 0,3 : F1 0,9353 et 0,9358
@@ -201,9 +202,9 @@ BN + dropout 0,3 + wd + AA & $0{,}9516\pm0{,}0052$ & 0,159 & 0,027 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[!htb]
 \centering
-\includegraphics[width=\columnwidth]{v2_compare_loss}
+\includegraphics[width=0.6\textwidth]{v2_compare_loss}
 \caption{Loss de validation (graine 0) des trois configurations retenues : \texttt{combo}, \texttt{es}
 (arrêt anticipé seul) et \texttt{dropout5} (dropout 0,5).}
 \label{fig:valloss}
@@ -215,7 +216,7 @@ Les trois configurations retenues sur la validation (\texttt{combo} : BatchNorm 
 sur le test (2\,947 fenêtres, 9 volontaires absents de l'apprentissage et de la validation), avec 3 graines
 (tableau~\ref{tab:test}). La référence et la version~1 ont été évaluées de la même manière en fin de version~1.
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering\footnotesize
 \setlength{\tabcolsep}{2pt}
 \caption{Évaluation finale (F1 macro, 3 graines pour les réseaux). Les F1 de validation de la version~2 sont
@@ -244,7 +245,7 @@ variabilité) ; \texttt{es} et \texttt{dropout5} sont indiscernables. La plus fo
 volontaires, et nos résultats ne permettent pas de séparer les deux effets. Enfin, aucun réseau ne dépasse la
 régression logistique au test (0,9353), alors que tous sauf \texttt{dropout5} la devançaient en validation.
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering\footnotesize
 \setlength{\tabcolsep}{2pt}
 \caption{F1 par classe au test (moyenne sur 3 graines).}
@@ -273,7 +274,7 @@ d'accéléromètre et de gyroscope sont très proches ; seule une faible différ
 « allongé », presque parfait en validation, voit 4 à 5\,\% de ses fenêtres prédites « debout » : cela suggère
 quelques volontaires ou enregistrements atypiques dans le test, ce que nous n'avons pas vérifié.
 
-\begin{figure*}[t]
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=0.32\textwidth]{v2_cm_test_combo}\hfill
 \includegraphics[width=0.32\textwidth]{v2_cm_test_es}\hfill
@@ -281,7 +282,7 @@ quelques volontaires ou enregistrements atypiques dans le test, ce que nous n'av
 \caption{Matrices de confusion sur le test (3 graines cumulées, normalisées par ligne) :
 \texttt{combo}, \texttt{es} et \texttt{dropout5}.}
 \label{fig:cm}
-\end{figure*}
+\end{figure}
 \subsection{Espace latent : t-SNE et UMAP} % Alioune
 t-SNE convertit les distances en probabilités de voisinage (gaussiennes dans l'espace d'origine, de largeur fixée par
 la perplexité) et cherche une disposition 2D qui les conserve ; UMAP conserve un graphe de plus proches voisins. Les
@@ -295,9 +296,9 @@ celles que le modèle confond : la corrélation entre chevauchement et taux de c
 et les deux paires dominantes sont debout $\to$ assis (12,5\,\% de confusion, 9\,\% de voisins) et assis $\to$
 debout (8\,\% et 11\,\%). La pureté des projections t-SNE varie peu d'une graine à l'autre ($0{,}957\pm0{,}001$).
 
-\begin{figure}[t]
+\begin{figure}[!htb]
 \centering
-\includegraphics[width=\columnwidth]{p6_tsne_entrees_vs_couche_cachee}
+\includegraphics[width=0.85\textwidth]{p6_tsne_entrees_vs_couche_cachee}
 \caption{t-SNE (perplexité 30) des fenêtres de validation : variables d'entrée (gauche) et couche cachée du MLP de la
 version~1 (droite).}
 \label{fig:tsne}
@@ -338,15 +339,15 @@ deux postures que les capteurs distinguent mal, et la couche cachée reproduit c
 par volontaires permettrait de mesurer la variabilité due au choix des personnes, que nos écarts-types ne couvrent pas.
 
 \section*{Usage d'outils d'IA}       % Ensemble — depuis AI_USAGE.md
-Nous avons utilisé l'assistant Claude (Anthropic). Pour la partie de Madjiguène Fall : guidage de la mise en place,
-écriture des scripts d'expériences et des cellules du notebook de la version~2, aide à la lecture des tableaux
-et à la rédaction des interprétations et de ce rapport. Chaque script a été exécuté, les nombres de paramètres
-recalculés, une cellule de contrôle a vérifié que les modèles évalués au test reproduisent les résultats de
-validation, et les formulations ont été relues face aux tableaux et figures ; les explications non vérifiées
-sont signalées comme hypothèses. Pour la partie d'Alioune Diop : génération de l'organisation du dépôt, du code
-commun et des notebooks d'exploration, de version~1 et d'interprétabilité, et aide à la rédaction de ses sections. Les
-notebooks ont été exécutés sur les vraies données, les contrôles (perte initiale, mini-lot, absence de volontaire
-commun entre apprentissage et validation, test utilisé une seule fois) vérifiés, et les chiffres du rapport relus
-face aux sorties. Le détail figure dans \texttt{report/AI\_USAGE.md}.
+Comme le sujet l'autorise, nous avons tous les deux utilisé l'assistant Claude (Anthropic) comme aide à la
+programmation et à la rédaction : écriture de code à partir de nos consignes (code commun, scripts d'expériences,
+cellules des notebooks), dépannage de l'environnement et aide à la formulation des interprétations. Nous avons
+conduit et contrôlé ce travail : cadrage dans le style des TP du cours, exécution de toutes les expériences sur
+les vraies données, vérification des contrôles (perte initiale $\approx \ln 6$, mini-lot appris, aucun volontaire
+commun entre apprentissage et validation, test utilisé une seule fois), recalcul des nombres de paramètres,
+cellule de cohérence entre validation et test, et relecture de chaque chiffre face aux sorties ; les explications
+non vérifiées sont signalées comme hypothèses. Alioune Diop a en outre mené une seconde implémentation
+indépendante (avec l'outil Antigravity), confrontée à celle-ci pour contrôler les choix et les résultats.
+Le détail, fichier par fichier, figure dans \texttt{report/AI\_USAGE.md}.
 
 \end{document}
