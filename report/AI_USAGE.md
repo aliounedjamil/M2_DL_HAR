@@ -25,7 +25,7 @@ Le tableau ci-dessus couvre tout l'usage ; ces points sont ceux où l'assistant 
 code que nous n'aurions pas écrits seuls aussi vite :
 
 - **Test d'amplitude du pas** (`lr_range_test`, V1, d'après Smith) : principe proposé et code écrit par l'assistant ;
-  nous avons vérifié que le pas retenu tombe dans la zone de descente de la courbe.
+  ses indications ont été confrontées au balayage du pas sur grille (3 graines).
 - **Mesures de séparation de l'espace latent** (`src/har/interpret.py`, notebook 06) : silhouette, pureté des
   k plus proches voisins et comparaison au chevauchement de la matrice de confusion.
 - **Cellule de cohérence de la V2** (section 5.5) : réentraînement des configurations retenues et comparaison
