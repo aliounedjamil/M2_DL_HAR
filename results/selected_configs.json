@@ -1,0 +1,107 @@
+{
+  "combo": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "activation": [
+      "relu",
+      "relu",
+      "tanh"
+    ],
+    "optimizer": "adam",
+    "lr": 0.0003,
+    "epochs": 30,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "norm": "batch",
+    "dropout": 0.3,
+    "weight_decay": 0.0001,
+    "patience": 5,
+    "p4_key": "bn + drop 0.3 + wd + ES",
+    "val_summary": {
+      "val_acc": {
+        "mean": 0.9478458049886621,
+        "std": 0.005753339889508109
+      },
+      "val_f1": {
+        "mean": 0.9516405334371751,
+        "std": 0.00521852394567845
+      }
+    }
+  },
+  "es": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "activation": [
+      "relu",
+      "relu",
+      "tanh"
+    ],
+    "optimizer": "adam",
+    "lr": 0.0003,
+    "epochs": 30,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "norm": null,
+    "dropout": 0.0,
+    "weight_decay": 0.0,
+    "patience": 5,
+    "p4_key": "early stopping (p=5)",
+    "val_summary": {
+      "val_acc": {
+        "mean": 0.9406651549508692,
+        "std": 0.006218625348414371
+      },
+      "val_f1": {
+        "mean": 0.9462351373203487,
+        "std": 0.005021175906076485
+      }
+    }
+  },
+  "dropout5": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "activation": [
+      "relu",
+      "relu",
+      "tanh"
+    ],
+    "optimizer": "adam",
+    "lr": 0.0003,
+    "epochs": 30,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "norm": null,
+    "dropout": 0.5,
+    "weight_decay": 0.0,
+    "patience": null,
+    "p4_key": "dropout 0.5",
+    "val_summary": {
+      "val_acc": {
+        "mean": 0.9344293272864701,
+        "std": 0.0037745624254418414
+      },
+      "val_f1": {
+        "mean": 0.9379285469694416,
+        "std": 0.0038361809922147503
+      }
+    }
+  }
+}
