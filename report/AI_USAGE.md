@@ -18,3 +18,16 @@ correspondante du rapport.
 | 2026-11-18 → 22 | Alioune | Claude | `notebooks/00_exploration.ipynb`, `V1_one_hidden_layer.ipynb`, `06_interpretability.ipynb` (parcours A) | écriture des notebooks dans le style des TP (découpage par volontaire, référence, contrôles, réglage du pas, 3 graines, test unique, t-SNE/UMAP) ; alignement de la validation sur celle de la V2 | Restart & Run All sur les vraies données (2026-11-22) ; perte initiale 1,77–1,87 (≈ ln 6), mini-lot appris à 100 %, aucun volontaire commun entre apprentissage et validation, test évalué une seule fois ; contrôle 5.5 de la V2 (F1 réentraînés = P4 à 0,001 près) |
 | 2026-11-22 | Alioune | Claude | `report/main.tex` : résumé, introduction, données, référence, MLP 1 couche, espace latent, conclusion ; lignes référence/V1 du tableau de test ; mise à jour des chiffres de test de la V2 après réexécution | rédaction à partir des sorties des notebooks | chaque chiffre relu face aux sorties ; formulations trop fortes corrigées (significativité, écarts validation–test) |
 | 2026-11-22 | Alioune | Claude | cellules « Réponse » de `00_exploration.ipynb`, `V1_one_hidden_layer.ipynb` et `06_interpretability.ipynb` (et tableau de synthèse 7.1) | rédaction des réponses à partir des sorties et des figures des notebooks exécutés | chaque chiffre relu face aux sorties (une valeur corrigée : part des classes en validation) |
+
+## Parties où l'apport de l'assistant a été le plus marqué
+
+Le tableau ci-dessus couvre tout l'usage ; ces points sont ceux où l'assistant a apporté des techniques ou du
+code que nous n'aurions pas écrits seuls aussi vite :
+
+- **Test d'amplitude du pas** (`lr_range_test`, V1, d'après Smith) : principe proposé et code écrit par l'assistant ;
+  nous avons vérifié que le pas retenu tombe dans la zone de descente de la courbe.
+- **Mesures de séparation de l'espace latent** (`src/har/interpret.py`, notebook 06) : silhouette, pureté des
+  k plus proches voisins et comparaison au chevauchement de la matrice de confusion.
+- **Cellule de cohérence de la V2** (section 5.5) : réentraînement des configurations retenues et comparaison
+  aux résultats de P4 avant l'évaluation sur le test.
+- **Outillage** : script de construction de l'archive (`scripts/make_submission.sh`) et mise en page LaTeX du rapport.
