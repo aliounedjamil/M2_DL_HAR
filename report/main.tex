@@ -1,9 +1,18 @@
 \documentclass[10pt,a4paper,twocolumn]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[french]{babel}
+\usepackage{iftex}
+\ifPDFTeX                       % pdfLaTeX (Overleaf, MiKTeX) : babel
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+  \usepackage[french]{babel}
+\else                           % XeLaTeX / LuaLaTeX : polyglossia
+  \usepackage{fontspec}
+  \usepackage{polyglossia}
+  \setmainlanguage{french}
+\fi
 \usepackage[margin=2cm]{geometry}
 \usepackage{graphicx,booktabs,amsmath,hyperref,caption}
+\hypersetup{hidelinks}
 \graphicspath{{figures/}{../results/figures/}}
 
 \title{Étude progressive des réseaux de neurones multicouches\\pour la reconnaissance d'activités humaines (HAR)}
