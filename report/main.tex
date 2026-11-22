@@ -339,10 +339,15 @@ deux postures que les capteurs distinguent mal, et la couche cachée reproduit c
 par volontaires permettrait de mesurer la variabilité due au choix des personnes, que nos écarts-types ne couvrent pas.
 
 \section*{Usage d'outils d'IA}       % Ensemble — depuis AI_USAGE.md
-Conformément au sujet, nous signalons que nous avons utilisé l'assistant Claude (Anthropic) comme aide à la
-programmation (écriture et débogage du code), à la mise en place de l'environnement et à la rédaction. Nous avons
-gardé la main sur les choix et exécuté puis vérifié toutes les expériences nous-mêmes : contrôles de l'apprentissage,
-séparation des volontaires, test utilisé une seule fois, chiffres relus face aux sorties. Le détail par fichier figure
-dans \texttt{report/AI\_USAGE.md}.
+Conformément au sujet, nous indiquons où nous avons utilisé l'assistant Claude (Anthropic) et comment nous avons
+vérifié ce qu'il a produit.
+\emph{Où :} écriture et débogage du code des notebooks et des scripts d'expériences (fonctions d'entraînement
+inspirées des TP, test d'amplitude du pas, mesures de séparation de l'espace latent), mise en place de
+l'environnement, aide à la rédaction des interprétations et du rapport.
+\emph{Vérification :} exécution complète des notebooks sur les vraies données ; contrôles du TP2 (perte initiale
+$\approx \ln 6$, mini-lot appris) ; absence de volontaire commun entre apprentissage et validation ; nombres de
+paramètres recalculés ; cellule de cohérence avant le test, utilisé une seule fois ; chaque chiffre relu face aux
+sorties, explications non vérifiées signalées comme hypothèses. Le détail par fichier figure dans
+\texttt{report/AI\_USAGE.md}.
 
 \end{document}
