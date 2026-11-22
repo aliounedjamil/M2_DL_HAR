@@ -1,0 +1,16 @@
+{
+  "hidden_dim": 64,
+  "activation": "relu",
+  "optimizer": "SGD+momentum",
+  "lr": 0.03,
+  "n_epochs": 50,
+  "val_subjects": [
+    3,
+    15,
+    16,
+    21,
+    22
+  ],
+  "val_acc": "0.9470 \u00b1 0.0026",
+  "val_f1": "0.9500 \u00b1 0.0028"
+}

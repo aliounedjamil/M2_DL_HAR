@@ -1,0 +1,42 @@
+{
+  "resultats": {
+    "val accuracy": {
+      "r\u00e9f\u00e9rence (r\u00e9gression logistique)": "0.9422",
+      "MLP1 relu / SGD+momentum (3 graines)": "0.9470 \u00b1 0.0026"
+    },
+    "test accuracy": {
+      "r\u00e9f\u00e9rence (r\u00e9gression logistique)": "0.9345",
+      "MLP1 relu / SGD+momentum (3 graines)": "0.9309 \u00b1 0.0014"
+    },
+    "val F1 macro": {
+      "r\u00e9f\u00e9rence (r\u00e9gression logistique)": "0.9461",
+      "MLP1 relu / SGD+momentum (3 graines)": "0.9500 \u00b1 0.0028"
+    },
+    "test F1 macro": {
+      "r\u00e9f\u00e9rence (r\u00e9gression logistique)": "0.9353",
+      "MLP1 relu / SGD+momentum (3 graines)": "0.9318 \u00b1 0.0014"
+    }
+  },
+  "decoupages": {
+    "r\u00e9gression logistique | al\u00e9atoire": {
+      "accuracy validation": 0.9841269841269841,
+      "accuracy test": 0.9507974211062097,
+      "validation \u2212 test": 0.03332956302077439
+    },
+    "r\u00e9gression logistique | par volontaire": {
+      "accuracy validation": 0.9421768707482994,
+      "accuracy test": 0.9345096708517137,
+      "validation \u2212 test": 0.007667199896585708
+    },
+    "MLP retenu | al\u00e9atoire": {
+      "accuracy validation": 0.9861426051902242,
+      "accuracy test": 0.942427327225427,
+      "validation \u2212 test": 0.04371527796479724
+    },
+    "MLP retenu | par volontaire": {
+      "accuracy validation": 0.9470269589317208,
+      "accuracy test": 0.930890170795159,
+      "validation \u2212 test": 0.01613678813656183
+    }
+  }
+}
