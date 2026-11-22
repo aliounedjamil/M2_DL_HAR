@@ -16,17 +16,66 @@
 % 6 pages maximum. Responsable de chaque section indiqué en commentaire.
 
 \begin{abstract}
-% Ensemble — à écrire en dernier.
+Nous étudions des perceptrons multicouches pour reconnaître six activités à partir des 561 variables calculées sur
+les capteurs d'un smartphone (jeu HAR). La validation est formée de volontaires entiers : un découpage aléatoire des
+lignes surestime la performance de 3 à 4 points, car les fenêtres consécutives d'une même personne se chevauchent.
+Après réglage du pas d'apprentissage de chaque optimiseur et répétition sur trois graines, le meilleur réseau à une
+couche cachée dépasse légèrement la régression logistique en validation (F1 0,950 contre 0,946), mais pas au test
+(0,932 contre 0,935). Largeur, profondeur et régularisations n'apportent pas de gain net ; seule une combinaison avec
+arrêt anticipé améliore la validation, et le meilleur réseau profond atteint 0,934 au test. Les erreurs restantes
+opposent surtout « assis » et « debout », ce que confirment les projections t-SNE et UMAP de la couche cachée.
 \end{abstract}
 
 \section{Introduction}               % Alioune
-% Motivation, problématique, choix méthodologiques (validation par volontaire, graines, test unique).
+La reconnaissance d'activités humaines à partir des capteurs d'un smartphone (accéléromètre et gyroscope) sert au suivi
+médical et sportif. L'objectif n'est pas d'obtenir le meilleur score possible, mais de comprendre ce qu'apporte chaque
+choix de conception d'un réseau de neurones multicouche (MLP) : activation, optimiseur, pas d'apprentissage, largeur,
+profondeur, régularisation. Nous suivons pour cela la démarche du cours : une référence simple, une validation sans
+fuite d'information, des comparaisons répétées sur trois graines (0, 1, 2), et un jeu de test utilisé une seule fois,
+une fois tous les choix figés. La version~1 étudie un réseau à une couche cachée, la version~2 des réseaux plus
+profonds et régularisés.
 
 \section{Données et prétraitements}  % Alioune
 \subsection{Jeu de données HAR}
+Chaque observation est une fenêtre de 2,56\,s décrite par 561 variables calculées dans les domaines temporel et
+fréquentiel ; la cible compte six activités (marche, montée et descente d'escaliers, assis, debout, allongé). Le
+fichier d'apprentissage contient 7\,352 fenêtres de 21 volontaires, le fichier de test 2\,947 fenêtres de 9 autres
+volontaires. Il n'y a ni valeur manquante ni doublon, et les classes sont proches de l'équilibre (rapport 1,43 entre la
+plus et la moins fréquente). Les variables sont déjà comprises dans $[-1,1]$ mais n'ont ni la même moyenne ni le même
+écart-type : nous les standardisons avec les statistiques de l'apprentissage uniquement. La colonne \texttt{subject}
+n'est pas une entrée (c'est un identifiant, et les volontaires du test sont inconnus) ; elle sert à construire la
+validation. La cible est encodée en indices 0 à 5 pour l'entropie croisée.
+
 \subsection{Découpage apprentissage / validation}
-% Tableau : validation par lignes vs par volontaire vs test.
+Deux fenêtres consécutives d'un même volontaire se chevauchent de 50\,\%. Si l'on tire les lignes au hasard, presque
+chaque fenêtre de validation a une « jumelle » dans l'apprentissage : la plus proche fenêtre d'apprentissage provient
+du même volontaire dans 80,5\,\% des cas, contre 0\,\% quand la validation est formée de volontaires entiers. Nous
+réservons donc 5 volontaires entiers (3, 15, 16, 21, 22 ; 1\,764 fenêtres), communs aux deux versions. Le
+tableau~\ref{tab:split}, complété après l'évaluation finale, compare les deux découpages pour un même modèle : le
+découpage aléatoire surestime l'accuracy de test de 3,3 à 4,4 points, le découpage par volontaire de 0,8 à 1,6 point
+seulement. C'est donc lui qui estime le mieux la performance sur des personnes nouvelles.
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Accuracy de validation et de test selon le découpage (MLP : moyenne sur 3 graines).}
+\label{tab:split}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Modèle & Découpage & Val. & Test & Val.\,$-$\,test \\
+\midrule
+Régr. logistique & aléatoire & 0,984 & 0,951 & 0,033 \\
+Régr. logistique & volontaires & 0,942 & 0,935 & 0,008 \\
+MLP $[64]$ & aléatoire & 0,986 & 0,942 & 0,044 \\
+MLP $[64]$ & volontaires & 0,947 & 0,931 & 0,016 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Référence : régression logistique}
+La régression logistique multinomiale (3\,372 paramètres) est un réseau sans couche cachée. Sur la validation, elle
+atteint une accuracy de 0,942 et un F1 macro de 0,946 ; ses F1 les plus faibles sont ceux d'« assis » (0,893) et de
+« debout » (0,882), les autres classes dépassant 0,97.
 
 %% ====================================================================== Madjiguène
 \section{Architectures}              % Madjiguène
@@ -65,6 +114,25 @@ $[256,128,64,32]$, T & 187\,302 & $0{,}9367\pm0{,}0090$ & 0,066 & 9,3 \\
 
 \section{Résultats}
 \subsection{MLP à une couche cachée}  % Alioune — activations, optimiseurs, LR, variabilité
+\paragraph{Contrôles.} Avant entraînement, la perte vaut 1,77 à 1,87 selon la graine, proche de $\ln 6 \approx 1{,}79$
+attendu pour des prédictions uniformes ; le réseau $561\to64\to6$ apprend par cœur un mini-lot de 64 exemples
+(perte 0,001, accuracy 100\,\%), ce qui écarte les erreurs grossières de mise en œuvre.
+
+\paragraph{Pas d'apprentissage.} Pour chaque couple (activation, optimiseur), un \emph{LR range test} situe la zone
+utile, puis un balayage sur neuf pas de $10^{-4}$ à 1 (15 époques) retient le meilleur F1 de validation. Les pas
+retenus dépendent fortement de l'optimiseur : $10^{-3}$ pour Adam, $3\cdot10^{-2}$ pour SGD et SGD avec momentum (ReLU),
+$10^{-1}$ pour SGD avec la sigmoïde, dont les gradients sont plus faibles. Au-delà, l'entraînement diverge (SGD avec
+momentum dès 0,3).
+
+\paragraph{Activations et optimiseurs.} Les neuf combinaisons, chacune avec son pas, sont entraînées 50 époques sur
+3 graines. Toutes atteignent un F1 de validation de 0,940 à 0,950. La meilleure, ReLU avec SGD + momentum
+($0{,}9500\pm0{,}0028$), ne se distingue ni de ReLU + SGD ni de ReLU + Adam : l'écart (0,001 à 0,002) est inférieur à
+la somme des écarts-types. Elle dépasse en revanche nettement cinq des six configurations sigmoïde et tanh (écarts de 0,005 à 0,010, supérieurs
+à la variabilité). Son avantage sur la référence (+0,004, pour 0,003 de variabilité) est significatif mais faible. Toutes les configurations atteignent
+une accuracy d'apprentissage proche de 100\,\% et une perte de validation minimale vers l'époque 4 à 23 : le réseau
+sur-apprend vite. Les classes étant équilibrées, accuracy et F1 macro classent les configurations de la même façon
+(écart maximal 0,006) ; le F1 par classe reste le plus utile, et montre que le MLP ne progresse pas sur « assis » et
+« debout ».
 
 \subsection{Largeur et profondeur}    % Madjiguène
 Le pas d'apprentissage est choisi sur la validation parmi $\{10^{-4},3\!\cdot\!10^{-4},10^{-3},3\!\cdot\!10^{-3}\}$
@@ -136,34 +204,36 @@ BN + dropout 0,3 + wd + AA & $0{,}9516\pm0{,}0052$ & 0,159 & 0,027 \\
 Les trois configurations retenues sur la validation (\texttt{combo} : BatchNorm + dropout 0,3 + weight decay
 + arrêt anticipé ; \texttt{es} : arrêt anticipé seul ; \texttt{dropout5} : dropout 0,5) sont évaluées une seule fois
 sur le test (2\,947 fenêtres, 9 volontaires absents de l'apprentissage et de la validation), avec 3 graines
-(tableau~\ref{tab:test}).
-% Alioune : ajouter au tableau commun les lignes « régression logistique » et « V1 [64] ».
+(tableau~\ref{tab:test}). La référence et la version~1 ont été évaluées de la même manière en fin de version~1.
 
 \begin{table}[t]
 \centering\footnotesize
 \setlength{\tabcolsep}{2pt}
-\caption{Évaluation finale de la version~2 : F1 macro en validation et au test (3 graines).
-$\Delta$ : test moins validation.}
+\caption{Évaluation finale (F1 macro, 3 graines pour les réseaux). Les F1 de validation de la version~2 sont
+ceux des modèles réentraînés évalués au test (section~5.5 du notebook). $\Delta$ : test moins validation.}
 \label{tab:test}
 \begin{tabular}{@{}lccc@{}}
 \toprule
 Configuration & F1 val. & F1 test & $\Delta$ \\
 \midrule
-\texttt{combo} & $0{,}9516\pm0{,}0052$ & $0{,}9369\pm0{,}0017$ & $-0{,}015$ \\
+Régression logistique & $0{,}9461$ & $0{,}9353$ & $-0{,}011$ \\
+V1 $[64]$ & $0{,}9500\pm0{,}0028$ & $0{,}9318\pm0{,}0014$ & $-0{,}018$ \\
+\midrule
+\texttt{combo} & $0{,}9522\pm0{,}0078$ & $0{,}9342\pm0{,}0033$ & $-0{,}018$ \\
 \texttt{es} & $0{,}9462\pm0{,}0050$ & $0{,}9262\pm0{,}0021$ & $-0{,}020$ \\
-\texttt{dropout5} & $0{,}9379\pm0{,}0038$ & $0{,}9260\pm0{,}0073$ & $-0{,}012$ \\
-% Alioune : lignes référence et V1
+\texttt{dropout5} & $0{,}9366\pm0{,}0050$ & $0{,}9273\pm0{,}0079$ & $-0{,}009$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Les trois configurations perdent entre 0,012 et 0,020 de F1 par rapport à la validation : celle-ci est
-optimiste. \texttt{combo} reste la meilleure (F1 0,9369 $\pm$ 0,0017, accuracy 0,936). Son écart avec \texttt{es}
-et \texttt{dropout5} (environ 0,011, accuracy 0,926) dépasse la variabilité entre graines (0,002 à 0,007), alors que
-ces deux dernières sont indiscernables, bien qu'\texttt{es} devance \texttt{dropout5} en validation. La plus forte
-baisse concerne \texttt{es} ($-0{,}020$), dont l'époque est choisie sur la validation, ce qui va dans le sens d'un
-biais de sélection ; mais \texttt{dropout5}, sans choix d'époque, baisse aussi ($-0{,}012$) : une partie de l'écart
-vient donc du changement de volontaires, et nos résultats ne permettent pas de séparer les deux effets.
+Les trois configurations perdent entre 0,009 et 0,020 de F1 par rapport à la validation : celle-ci est
+optimiste. \texttt{combo} reste la meilleure (F1 0,9342 $\pm$ 0,0033, accuracy 0,934). Son écart avec \texttt{es}
+(0,008) dépasse la variabilité entre graines (0,005), mais pas son écart avec \texttt{dropout5} (0,007, pour 0,011 de
+variabilité) ; \texttt{es} et \texttt{dropout5} sont indiscernables. La plus forte baisse concerne \texttt{es}
+($-0{,}020$), dont l'époque est choisie sur la validation, ce qui va dans le sens d'un biais de sélection ; mais
+\texttt{dropout5}, sans choix d'époque, baisse aussi ($-0{,}009$) : une partie de l'écart vient donc du changement de
+volontaires, et nos résultats ne permettent pas de séparer les deux effets. Enfin, aucun réseau ne dépasse la
+régression logistique au test (0,9353), alors que tous sauf \texttt{dropout5} la devançaient en validation.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -174,23 +244,23 @@ vient donc du changement de volontaires, et nos résultats ne permettent pas de 
 \toprule
 Classe & \texttt{combo} & \texttt{es} & \texttt{dropout5} \\
 \midrule
-Marche & 0,954 & 0,951 & 0,943 \\
-Montée d'escaliers & 0,938 & 0,920 & 0,922 \\
-Descente d'escaliers & 0,960 & 0,939 & 0,939 \\
-Assis & 0,906 & 0,888 & 0,888 \\
-Debout & 0,891 & 0,893 & 0,889 \\
-Allongé & 0,973 & 0,965 & 0,975 \\
+Marche & 0,946 & 0,951 & 0,945 \\
+Montée d'escaliers & 0,927 & 0,920 & 0,927 \\
+Descente d'escaliers & 0,951 & 0,939 & 0,941 \\
+Assis & 0,908 & 0,888 & 0,893 \\
+Debout & 0,895 & 0,893 & 0,886 \\
+Allongé & 0,977 & 0,965 & 0,972 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Classes difficiles.} Les F1 les plus bas sont ceux d'« assis » et de « debout » (0,89 à 0,91,
-tableau~\ref{tab:classes}), qui se confondent mutuellement dans 7 à 14\,\% des cas (figure~\ref{fig:cm}) ;
-\texttt{dropout5} est asymétrique (assis reconnu à 86\,\%, debout à 94\,\%), alors que \texttt{combo} est plus
-équilibré (90\,\% et 92\,\%). Du point de vue des capteurs, ce sont deux postures statiques dont les signaux
+tableau~\ref{tab:classes}), qui se confondent mutuellement dans 7 à 13\,\% des cas (figure~\ref{fig:cm}) ;
+\texttt{dropout5} est asymétrique (assis reconnu à 87\,\%, debout à 93\,\%), alors que \texttt{combo} est
+équilibré (91\,\% et 91\,\%). Du point de vue des capteurs, ce sont deux postures statiques dont les signaux
 d'accéléromètre et de gyroscope sont très proches ; seule une faible différence d'inclinaison du tronc les sépare
 (explication plausible, non vérifiée ici). Parmi les marches, « montée » est prise pour « marche » dans 6 à
-7\,\% des cas et « descente » pour « montée » dans 4 à 7\,\%, des mouvements périodiques voisins. Enfin,
+8\,\% des cas et « descente » pour « montée » dans 5 à 7\,\%, des mouvements périodiques voisins. Enfin,
 « allongé », presque parfait en validation, voit 4 à 5\,\% de ses fenêtres prédites « debout » : cela suggère
 quelques volontaires ou enregistrements atypiques dans le test, ce que nous n'avons pas vérifié.
 
@@ -204,18 +274,41 @@ quelques volontaires ou enregistrements atypiques dans le test, ce que nous n'av
 \label{fig:cm}
 \end{figure*}
 \subsection{Espace latent : t-SNE et UMAP} % Alioune
+t-SNE convertit les distances en probabilités de voisinage (gaussiennes dans l'espace d'origine, de largeur fixée par
+la perplexité) et cherche une disposition 2D qui les conserve ; UMAP conserve un graphe de plus proches voisins. Les
+deux préservent surtout la structure locale : tailles et distances entre groupes ne sont pas interprétables, et la
+figure dépend de la perplexité et de la graine. Nous projetons les fenêtres de validation, d'abord dans l'espace des
+561 variables, puis dans la couche cachée du MLP de la version~1 (figure~\ref{fig:tsne}). Pour ne pas conclure sur une
+impression visuelle, nous mesurons aussi la séparation en dimension d'origine : le coefficient de silhouette passe de
+0,06 (entrées) à 0,38 (couche cachée), et la part des 10 plus proches voisins de même classe de 0,912 à 0,957. Le
+réseau a donc rendu les classes plus compactes. Les paires de classes qui se chevauchent dans la couche cachée sont
+celles que le modèle confond : la corrélation entre chevauchement et taux de confusion, sur les 30 paires, vaut 0,92,
+et les deux paires dominantes sont debout $\to$ assis (12,5\,\% de confusion, 9\,\% de voisins) et assis $\to$
+debout (8\,\% et 11\,\%). La pureté des projections t-SNE varie peu d'une graine à l'autre ($0{,}957\pm0{,}001$).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{p6_tsne_entrees_vs_couche_cachee}
+\caption{t-SNE (perplexité 30) des fenêtres de validation : variables d'entrée (gauche) et couche cachée du MLP de la
+version~1 (droite).}
+\label{fig:tsne}
+\end{figure}
 
 \section{Discussion}                  % Madjiguène
 \paragraph{Performances.} Hors le réseau à 4 couches sigmoïde qui n'apprend pas, les MLP atteignent un F1 de
 0,93 à 0,95, quelle que soit leur taille (36\,k à 187\,k paramètres) : les 561 caractéristiques calculées à la
 main sont déjà très informatives, et augmenter la capacité du réseau ne fait qu'accroître le sur-apprentissage.
-% Ensemble : gain par rapport à la régression logistique (chiffres d'Alioune).
+La régression logistique atteint d'ailleurs 0,946 en validation et 0,935 au test : aucun MLP ne la dépasse au test, et
+leur écart validation--test (0,018 à 0,020, sauf \texttt{dropout5} : 0,009) est en général plus grand que le sien (0,011,
+pour 3\,372 paramètres seulement). Sur ces
+variables, l'intérêt d'une couche cachée est donc surtout de réorganiser l'espace (section précédente), pas de mieux
+généraliser.
 
 \paragraph{Généralisation.} Trois niveaux apparaissent : une accuracy d'apprentissage proche de 100\,\%,
 environ 94--95\,\% sur les 5 volontaires de validation et 93\,\% sur les 9 volontaires du test, c'est-à-dire sur
 des personnes nouvelles. La régularisation (surtout la combinaison avec arrêt anticipé) réduit l'écart
 apprentissage--validation de 0,064 à 0,027 et améliore la loss, mais son gain de F1 au test
-($+0{,}011$ par rapport à \texttt{es}) reste modeste. Les projections t-SNE et UMAP de la dernière couche cachée
+($+0{,}008$ par rapport à \texttt{es}) reste modeste. Les projections t-SNE et UMAP de la dernière couche cachée
 de \texttt{combo} (validation) montrent un recouvrement partiel d'« assis » et « debout » alors que les autres
 classes forment des groupes séparés, en accord avec la confusion principale observée au test.
 
@@ -227,6 +320,13 @@ d'où l'optimisme observé. Avec trois graines, les écarts-types sont peu préc
 hypothèses.
 
 \section{Conclusion}                  % Ensemble
+(1) La validation par volontaires est indispensable : le découpage aléatoire surestime la performance de test de 3 à
+4 points. (2) Une fois le pas réglé pour chacun, les trois optimiseurs se valent avec ReLU ; la sigmoïde et tanh sont
+légèrement mais, pour la plupart, significativement en retrait. (3) Ni la largeur, ni la profondeur, ni une régularisation isolée
+n'améliorent la validation au-delà de la variabilité ; la combinaison avec arrêt anticipé est la meilleure, mais
+aucun réseau ne dépasse la régression logistique au test. (4) Les erreurs restantes opposent « assis » et « debout »,
+deux postures que les capteurs distinguent mal, et la couche cachée reproduit ce chevauchement. Une validation croisée
+par volontaires permettrait de mesurer la variabilité due au choix des personnes, que nos écarts-types ne couvrent pas.
 
 \section*{Usage d'outils d'IA}       % Ensemble — depuis AI_USAGE.md
 Nous avons utilisé l'assistant Claude (Anthropic). Pour la partie de Madjiguène Fall : guidage de la mise en place,
@@ -234,7 +334,10 @@ Nous avons utilisé l'assistant Claude (Anthropic). Pour la partie de Madjiguèn
 et à la rédaction des interprétations et de ce rapport. Chaque script a été exécuté, les nombres de paramètres
 recalculés, une cellule de contrôle a vérifié que les modèles évalués au test reproduisent les résultats de
 validation, et les formulations ont été relues face aux tableaux et figures ; les explications non vérifiées
-sont signalées comme hypothèses. Le détail figure dans \texttt{report/AI\_USAGE.md}.
-% Alioune : compléter pour sa partie.
+sont signalées comme hypothèses. Pour la partie d'Alioune Diop : génération de l'organisation du dépôt, du code
+commun et des notebooks d'exploration, de version~1 et d'interprétabilité, et aide à la rédaction de ses sections. Les
+notebooks ont été exécutés sur les vraies données, les contrôles (perte initiale, mini-lot, absence de volontaire
+commun entre apprentissage et validation, test utilisé une seule fois) vérifiés, et les chiffres du rapport relus
+face aux sorties. Le détail figure dans \texttt{report/AI\_USAGE.md}.
 
 \end{document}
