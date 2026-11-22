@@ -28,7 +28,7 @@ calculées sur l'accéléromètre et le gyroscope d'un smartphone, avec des MLP 
 - Largeur, profondeur et régularisations isolées n'améliorent pas la validation au-delà de la variabilité.
 - Aucun MLP ne dépasse la régression logistique au test ; la confusion principale oppose « assis » et « debout ».
 
-Détails : `report/main.pdf` (5 pages).
+Détails : `report/main.pdf` (6 pages).
 
 ## Relancer le projet
 
@@ -45,8 +45,10 @@ Dans `notebooks/`, *Restart & Run All*, dans cet ordre (≈ 45 min sur CPU au to
 3. `06_interpretability.ipynb` — t-SNE / UMAP (lit la configuration retenue par la V1)
 4. `V2_deep_network.ipynb` — réseaux profonds, régularisation, **test de la V2**
 
-Les expériences longues de la V2 (P3, P4, P7) sont dans `scripts/` ; leurs résultats sont déjà dans `results/logs/`
-et le notebook les relit (`RECALCULER = True` pour tout relancer, ≈ 1 h 30).
+Les deux versions (`V1_one_hidden_layer`, `V2_deep_network`) sont **autonomes** : tout leur code est dans le
+notebook, et elles ne demandent que `data/HAR/`. Les expériences longues de la V2 (P3, P4, P7, ≈ 1 h 30) enregistrent
+leurs résultats dans `results/` ; à l'exécution suivante, le notebook les relit (`RECALCULER = True` pour tout refaire).
+`src/` et `scripts/` contiennent la première version de ce code, avant son intégration dans le notebook V2.
 
 ## Méthodologie
 
@@ -60,8 +62,8 @@ et le notebook les relit (`RECALCULER = True` pour tout relancer, ≈ 1 h 30).
 ```
 data/HAR/      train.csv, test.csv (non fournis)
 notebooks/     les 4 notebooks exécutés
-src/har/       code commun : données, modèle MLP, entraînement, métriques, figures, t-SNE/UMAP
-scripts/       expériences V2 (p31, p32, p4, p51, p7) et construction de l'archive de rendu
+src/har/       première version du code commun de la V2 (intégré depuis dans le notebook)
+scripts/       premières versions des expériences V2, et construction de l'archive de rendu
 results/       figures et résultats chiffrés produits par les notebooks et les scripts
 report/        rapport (main.tex, main.pdf) et déclaration d'usage de l'IA (AI_USAGE.md)
 ```
