@@ -133,13 +133,108 @@ BN + dropout 0,3 + wd + AA & $0{,}9516\pm0{,}0052$ & 0,159 & 0,027 \\
 \end{figure}
 
 \subsection{Évaluation finale sur le test} % Alioune (référence + V1) · Madjiguène (V2) — tableau commun
+Les trois configurations retenues sur la validation (\texttt{combo} : BatchNorm + dropout 0,3 + weight decay
++ arrêt anticipé ; \texttt{es} : arrêt anticipé seul ; \texttt{dropout5} : dropout 0,5) sont évaluées une seule fois
+sur le test (2\,947 fenêtres, 9 volontaires absents de l'apprentissage et de la validation), avec 3 graines
+(tableau~\ref{tab:test}).
+% Alioune : ajouter au tableau commun les lignes « régression logistique » et « V1 [64] ».
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{2pt}
+\caption{Évaluation finale de la version~2 : F1 macro en validation et au test (3 graines).
+$\Delta$ : test moins validation.}
+\label{tab:test}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Configuration & F1 val. & F1 test & $\Delta$ \\
+\midrule
+\texttt{combo} & $0{,}9516\pm0{,}0052$ & $0{,}9369\pm0{,}0017$ & $-0{,}015$ \\
+\texttt{es} & $0{,}9462\pm0{,}0050$ & $0{,}9262\pm0{,}0021$ & $-0{,}020$ \\
+\texttt{dropout5} & $0{,}9379\pm0{,}0038$ & $0{,}9260\pm0{,}0073$ & $-0{,}012$ \\
+% Alioune : lignes référence et V1
+\bottomrule
+\end{tabular}
+\end{table}
+
+Les trois configurations perdent entre 0,012 et 0,020 de F1 par rapport à la validation : celle-ci est
+optimiste. \texttt{combo} reste la meilleure (F1 0,9369 $\pm$ 0,0017, accuracy 0,936). Son écart avec \texttt{es}
+et \texttt{dropout5} (environ 0,011, accuracy 0,926) dépasse la variabilité entre graines (0,002 à 0,007), alors que
+ces deux dernières sont indiscernables, bien qu'\texttt{es} devance \texttt{dropout5} en validation. La plus forte
+baisse concerne \texttt{es} ($-0{,}020$), dont l'époque est choisie sur la validation, ce qui va dans le sens d'un
+biais de sélection ; mais \texttt{dropout5}, sans choix d'époque, baisse aussi ($-0{,}012$) : une partie de l'écart
+vient donc du changement de volontaires, et nos résultats ne permettent pas de séparer les deux effets.
+
+\begin{table}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{2pt}
+\caption{F1 par classe au test (moyenne sur 3 graines).}
+\label{tab:classes}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Classe & \texttt{combo} & \texttt{es} & \texttt{dropout5} \\
+\midrule
+Marche & 0,954 & 0,951 & 0,943 \\
+Montée d'escaliers & 0,938 & 0,920 & 0,922 \\
+Descente d'escaliers & 0,960 & 0,939 & 0,939 \\
+Assis & 0,906 & 0,888 & 0,888 \\
+Debout & 0,891 & 0,893 & 0,889 \\
+Allongé & 0,973 & 0,965 & 0,975 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Classes difficiles.} Les F1 les plus bas sont ceux d'« assis » et de « debout » (0,89 à 0,91,
+tableau~\ref{tab:classes}), qui se confondent mutuellement dans 7 à 14\,\% des cas (figure~\ref{fig:cm}) ;
+\texttt{dropout5} est asymétrique (assis reconnu à 86\,\%, debout à 94\,\%), alors que \texttt{combo} est plus
+équilibré (90\,\% et 92\,\%). Du point de vue des capteurs, ce sont deux postures statiques dont les signaux
+d'accéléromètre et de gyroscope sont très proches ; seule une faible différence d'inclinaison du tronc les sépare
+(explication plausible, non vérifiée ici). Parmi les marches, « montée » est prise pour « marche » dans 6 à
+7\,\% des cas et « descente » pour « montée » dans 4 à 7\,\%, des mouvements périodiques voisins. Enfin,
+« allongé », presque parfait en validation, voit 4 à 5\,\% de ses fenêtres prédites « debout » : cela suggère
+quelques volontaires ou enregistrements atypiques dans le test, ce que nous n'avons pas vérifié.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.32\textwidth]{v2_cm_test_combo}\hfill
+\includegraphics[width=0.32\textwidth]{v2_cm_test_es}\hfill
+\includegraphics[width=0.32\textwidth]{v2_cm_test_dropout5}
+\caption{Matrices de confusion sur le test (3 graines cumulées, normalisées par ligne) :
+\texttt{combo}, \texttt{es} et \texttt{dropout5}.}
+\label{fig:cm}
+\end{figure*}
 \subsection{Espace latent : t-SNE et UMAP} % Alioune
 
 \section{Discussion}                  % Madjiguène
-% Performances, généralisation, limites.
+\paragraph{Performances.} Hors le réseau à 4 couches sigmoïde qui n'apprend pas, les MLP atteignent un F1 de
+0,93 à 0,95, quelle que soit leur taille (36\,k à 187\,k paramètres) : les 561 caractéristiques calculées à la
+main sont déjà très informatives, et augmenter la capacité du réseau ne fait qu'accroître le sur-apprentissage.
+% Ensemble : gain par rapport à la régression logistique (chiffres d'Alioune).
+
+\paragraph{Généralisation.} Trois niveaux apparaissent : une accuracy d'apprentissage proche de 100\,\%,
+environ 94--95\,\% sur les 5 volontaires de validation et 93\,\% sur les 9 volontaires du test, c'est-à-dire sur
+des personnes nouvelles. La régularisation (surtout la combinaison avec arrêt anticipé) réduit l'écart
+apprentissage--validation de 0,064 à 0,027 et améliore la loss, mais son gain de F1 au test
+($+0{,}011$ par rapport à \texttt{es}) reste modeste. Les projections t-SNE et UMAP de la dernière couche cachée
+de \texttt{combo} (validation) montrent un recouvrement partiel d'« assis » et « debout » alors que les autres
+classes forment des groupes séparés, en accord avec la confusion principale observée au test.
+
+\paragraph{Limites.} La validation ne compte que 5 volontaires, partagés par toutes les comparaisons, et les
+écarts-types ne portent que sur la graine d'entraînement : la variabilité due au choix des volontaires (validation
+comme test) n'est pas mesurée. Les configurations et l'époque d'arrêt ont été choisies sur cette seule validation,
+d'où l'optimisme observé. Avec trois graines, les écarts-types sont peu précis ; nous n'avons pas interprété les
+écarts inférieurs à 0,005. Enfin, les explications liées aux capteurs et aux volontaires atypiques restent des
+hypothèses.
 
 \section{Conclusion}                  % Ensemble
 
 \section*{Usage d'outils d'IA}       % Ensemble — depuis AI_USAGE.md
+Nous avons utilisé l'assistant Claude (Anthropic). Pour la partie de Madjiguène Fall : guidage de la mise en place,
+écriture des scripts d'expériences et des cellules du notebook de la version~2, aide à la lecture des tableaux
+et à la rédaction des interprétations et de ce rapport. Chaque script a été exécuté, les nombres de paramètres
+recalculés, une cellule de contrôle a vérifié que les modèles évalués au test reproduisent les résultats de
+validation, et les formulations ont été relues face aux tableaux et figures ; les explications non vérifiées
+sont signalées comme hypothèses. Le détail figure dans \texttt{report/AI\_USAGE.md}.
+% Alioune : compléter pour sa partie.
 
 \end{document}
